@@ -1,0 +1,75 @@
+<div class="page-wrapper">
+   <h2 class="title">Select Branch</h2>
+  <div class="card-container">
+
+   
+    <div class="top-header">
+     
+      <button 
+        class="btn btn-small rounded-pill text-white shadow add-btn" routerLink="addbranch">
+        <i class="bi bi-plus-circle me-2"></i> Add
+      </button>
+    </div>
+
+    
+
+    <form [formGroup]="branchForm" (ngSubmit)="onSubmit()" class="form-body">
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select Branch</mat-label>
+        <mat-select formControlName="branch">
+          <mat-option value="">Select Branch</mat-option>
+          <mat-option *ngFor="let b of branches" [value]="b.branchId">
+            {{b.branchName}} 
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="btn-save full-width" type="submit" [disabled]="branchForm.invalid">
+        Select Branch
+      </button>
+
+  
+
+    </form>
+  </div>
+</div>
+
+<div class="branch-card-list" *ngIf="branchListVisible | async">
+  <div class="branch-card" *ngFor="let b of branches">
+
+<div class="card-header">
+
+  <div class="branch-title text-primary">
+    <i class="bi bi-building-fill"></i>
+    <h3>{{ b.branchName | uppercase }}</h3>
+  </div>
+
+  <div class="card-top-actions">
+    <button class="btn-edit" (click)="editBranch(b.branchId)">
+      <i class="bi bi-pencil-square"></i>
+    </button>
+
+    <button class="btn-delete" (click)="confirmDelete(b.branchId)">
+      <i class="bi bi-trash"></i>
+    </button>
+  </div>
+
+</div>
+
+
+    <div class="card-body">
+      <p><i class="bi bi-geo-alt-fill location-icon"></i> <strong>Location:</strong>{{ b.location }}</p>
+      <p><i class="bi bi-building-gear"></i><strong>BranchCode:</strong>{{b.branchCode}}</p>
+      <p><i class="bi bi-mailbox"></i><strong>PinCode:</strong> {{ b.pinCode }}</p>
+    
+    </div>
+
+    
+
+    <button mat-raised-button color="primary" class="select-btn" (click)="selectBranch(b.branchId)">
+      <i class="bi bi-check2-circle me-2"></i> Select
+    </button>
+
+  </div>
+</div>

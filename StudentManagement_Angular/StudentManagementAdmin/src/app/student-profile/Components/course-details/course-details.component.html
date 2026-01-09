@@ -114,8 +114,9 @@
   </div>
 
   <div class="button-container">
-    <button mat-raised-button color="primary" type="submit" [disabled]="!courseDetailsForm.valid">
-      Next
+    <button mat-raised-button color="primary" type="submit"   [disabled]="!courseDetailsForm.valid || isSubmitting"
+>  {{ isSubmitting ? 'Saving...' : 'Next' }}
+      
     </button>
   </div>
 </form>

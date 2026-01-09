@@ -43,10 +43,17 @@
 
       <mat-form-field appearance="outline" class="form-group">
         <mat-label>Relation</mat-label>
-        <input matInput formControlName="relation" placeholder="Enter relation" />
+       <mat-select formControlName="relation" placeholder="Select relation">
+        <mat-option value="Father">Father</mat-option>
+        <mat-option value="Mother">Mother</mat-option>
+        <mat-option value="Guardian">Guardian</mat-option>
+        <mat-option value="Brother">Brother</mat-option>
+        <mat-option value="Sister">Sister</mat-option>
+        <mat-option value="Other">Other</mat-option>
+     </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-group">
+      <mat-form-field appearance="outline" class="form-group phone-width full-width">
         <mat-label>Phone</mat-label>
         <input matInput formControlName="phone" placeholder="Enter phone number" />
         <mat-error *ngIf="contactForm.get('phone')?.hasError('pattern')">
@@ -61,8 +68,9 @@
     </div>
 
     <div class="btn-wrapper">
-      <button mat-raised-button color="primary" type="submit" [disabled]="contactForm.invalid">
-        Next
+      <button mat-raised-button color="primary" type="submit" [disabled]="contactForm.invalid||isSubmitting"
+       >
+  {{ isSubmitting ? 'Saving...' : 'Next' }}
       </button>
     </div>
   </form>

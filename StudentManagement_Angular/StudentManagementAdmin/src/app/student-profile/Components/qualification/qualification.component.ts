@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { CollegeService } from 'src/app/college/Services/college.service';
 import { QualificationService } from 'src/app/qualification/Services/qualification.service';
 import { ExperienceConfirmDialogComponent } from '../experience-confirm-dialog/experience-confirm-dialog.component';
@@ -53,7 +53,7 @@ export class QualificationComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private dialog: MatDialog,
-    private studentProfileService: StudentProfileService,
+    private studentProfileService: ReportService,
     private collegeservice: CollegeService,
     private qualificationService: QualificationService,
     private progressService: ProgressTrackerService 
@@ -122,7 +122,7 @@ export class QualificationComponent implements OnInit {
     if (!control) return null;
     return control.errors;
   }
-
+isSubmitting = false;
   onSubmit() {
     if (this.qualificationForm.valid && this.studentId) {
       const newQualification: qualifications = {
@@ -131,7 +131,7 @@ export class QualificationComponent implements OnInit {
         qualificaionId: '', // backend can generate ID
         collegeId: this.colleges.find(c => c.collegeName === this.qualificationForm.value.collegeName)?.collegeId || null
       };
-
+this.isSubmitting = true; // 🔒 lock submit
       this.studentProfileService.addQualification(newQualification).subscribe({
         next: response => {
           this.studentProfileService.updateStudentData({ qualification: response });
@@ -155,8 +155,11 @@ export class QualificationComponent implements OnInit {
             });
           }
         },
-        error: error => console.error('Error adding qualification:', error)
-      });
+         error: error => {
+      console.error('Error adding qualification:', error);
+      this.isSubmitting = false; // ✅ re-enable button on error
+    }
+  });
     }
   }
 

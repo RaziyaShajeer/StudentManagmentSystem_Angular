@@ -30,10 +30,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 // Auth Interceptor
 import { AuthInterceptor } from './auth.interceptor';
 import { QualificationModule } from './qualification/qualification.module';
+import { PlacementsComponent } from './placements/placements.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
+    PlacementsComponent,
+
     
   ],
   imports: [

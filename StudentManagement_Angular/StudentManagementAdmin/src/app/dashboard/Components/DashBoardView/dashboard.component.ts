@@ -4,7 +4,8 @@ import { CollegeService } from 'src/app/college/Services/college.service';
 import { CourseService } from 'src/app/course/Services/course.service';
 import { BatchService} from 'src/app/batch/Services/batch.service';
 import { ReportService } from 'src/app/report/Services/report.service';
-
+import { DashboardService } from '../../Services/dashboard.service';
+import { PlacementsService } from 'src/app/placements/Services/placements.service';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -20,13 +21,19 @@ export class DashboardComponent implements OnInit {
   
   reportcount :number=0;
 
+  placementCount: number = 0;
+
+
 
   constructor(
     private trialStudentService: TrialStudentService,
     private collegeService: CollegeService,
     private courseService: CourseService,
     private batchService: BatchService,
-    private reportService:ReportService
+    private reportService:ReportService,
+    private DashboardService: DashboardService,
+    private PlacementsService: PlacementsService
+
   ) {}
 
   ngOnInit(): void {
@@ -63,6 +70,14 @@ export class DashboardComponent implements OnInit {
       (enrolled) => this.enrolledCount = enrolled.length,
       (error) => console.error('Error loading batches count:', error)
     );
+
+    this.PlacementsService.getPlacements().subscribe(
+      (placements) => this.placementCount = placements.length,
+      (error) => console.error('Error loading placements count:', error)
+    );
+
+
+   
   }
 
 }

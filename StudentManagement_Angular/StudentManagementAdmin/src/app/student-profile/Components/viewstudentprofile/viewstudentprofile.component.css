@@ -209,3 +209,11 @@ body {
 .secondary-contact-card button {
   margin: 0 4px;
 }
+.placed-company-box {
+  width: 100%;
+  min-height: 60px;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  resize: none;
+}

@@ -36,8 +36,9 @@ export class AdminLoginComponent {
           localStorage.setItem('token', res.token);
           this.loading = false;
 
-          // ✅ Redirect to dashboard after success
-          this.router.navigate(['/home']);
+         
+          this.router.navigate(['/home/branch']);
+          localStorage.setItem('firstLogin', 'true');
         },
         error: (err) => {
           this.loading = false;

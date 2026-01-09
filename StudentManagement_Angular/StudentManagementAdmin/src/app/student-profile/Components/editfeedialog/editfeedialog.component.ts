@@ -3,7 +3,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { fee, InstallmentStatus} from '../../Models/ProfileModels';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 
 
 
@@ -40,7 +40,7 @@ feeStatusOptions = [
     private dialogRef: MatDialogRef<EditfeedialogComponent>,
     private fb: FormBuilder,
 
-    private service: StudentProfileService
+    private service: ReportService
   ) {}
 
   ngOnInit(): void {

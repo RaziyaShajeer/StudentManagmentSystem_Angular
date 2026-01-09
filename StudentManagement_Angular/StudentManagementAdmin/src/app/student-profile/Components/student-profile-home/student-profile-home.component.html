@@ -1,36 +1,4 @@
-<!-- <div class="same-width-box">
-  <div class="progress-wrapper">
-    <mat-progress-bar
-      mode="determinate"
-      [value]="progressValue"
-      color="primary"
-      class="progress-bar"
-    ></mat-progress-bar>
 
-    <div class="steps-container">
-      <div
-        *ngFor="let step of steps; let i = index"
-        class="step-circle"
-        [class.active]="i <= currentStep"
-        [style.left.%]="(i / (steps.length - 1)) * 100"
-      >
-        {{ i + 1 }}
-      </div>
-    </div>
-
-    <div class="step-labels">
-      <ng-container *ngFor="let step of steps; let i = index">
-        <div
-          *ngIf="i < steps.length - 1"
-          class="step-label"
-          [style.left.%]="((i + 0.5) / (steps.length - 1)) * 100"
-        >
-          {{ step.label }}
-        </div>
-      </ng-container>
-    </div>
-  </div>
-</div> -->
 <div class="same-width-box">
 <div class="progress-wrapper">
   <mat-progress-bar
@@ -84,9 +52,31 @@
         View All Trial Students
       </button>
     </div>
+
+
   </mat-form-field>
 
+
   <form [formGroup]="ProfileForm" (ngSubmit)="onSubmit()">
+
+ <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Branch</mat-label>
+
+  <mat-select formControlName="branchId">
+    <mat-option *ngFor="let branch of branches" [value]="branch.branchId">
+      {{ branch.branchName }}
+    </mat-option>
+  </mat-select>
+
+  <mat-error *ngIf="ProfileForm.get('branchId')?.invalid">
+    Branch is required
+  </mat-error>
+</mat-form-field>
+
+
+
+
+
     <div class="form-grid">
       <mat-form-field appearance="outline" class="form-group">
         <mat-label>First Name</mat-label>
@@ -143,6 +133,7 @@
 
       <!-- added -->
 
+
       <!-- Student Photo Upload -->
 <div class="form-group">
   <label class="photo-label">Student Photo</label>
@@ -157,7 +148,7 @@
 
 
       <div class="btn-wrapper">
-        <button mat-raised-button color="primary" type="submit">Next</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="ProfileForm.invalid||isSubmitting">Next</button>
       </div>
     </div>
   </form>

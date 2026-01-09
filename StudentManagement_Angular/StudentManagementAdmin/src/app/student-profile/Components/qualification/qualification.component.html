@@ -106,8 +106,9 @@
 
 
     <div class="button-container">
-      <button mat-raised-button color="primary" type="submit" [disabled]="!qualificationForm.valid">
-        Save & Next
+      <button mat-raised-button color="primary" type="submit" [disabled]="!qualificationForm.valid||isSubmitting">>
+  {{ isSubmitting ? 'Saving...' : ' Save & Next' }}
+       
       </button>
     </div>
   </form>

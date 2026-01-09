@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TrialStudentService } from 'src/app/trial-student/Services/trial-student.service';
 import { ChangeDetectorRef } from '@angular/core';
@@ -30,6 +30,8 @@ export class FeeStructureComponent implements OnInit {
   validationErrorMessage: string = '';
   courseCount: number = 0;
   status!:number
+  isTrialEnrollment = false;
+
   
 
   // steps = [
@@ -56,7 +58,7 @@ export class FeeStructureComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private service: StudentProfileService,
+    private service: ReportService,
     private router: Router,
     private route: ActivatedRoute,
     private trailService: TrialStudentService,
@@ -83,15 +85,22 @@ export class FeeStructureComponent implements OnInit {
       this.studentId = params.get('studentId')!;
     });
 
-    this.route.queryParams.subscribe(params => {
-      this.courseDetailId = params['courseDetailId'];
-      this.trialStudentId = params['trialStudentId'] ?? '';
-    });
+   this.route.queryParams.subscribe(params => {
+  this.courseDetailId = params['courseDetailId'];
+  this.trialStudentId = params['trialStudentId'];
+});
 
-    // ✅ Fallback from service or localStorage
-    if (!this.trialStudentId) {
-      this.trialStudentId = this.service.trialStudentId || localStorage.getItem('trialStudentId') || '';
-    }
+this.trialStudentId =
+  this.trialStudentId ||
+  this.service.trialStudentId ||
+  localStorage.getItem('trialStudentId') ||
+  '';
+
+this.isTrialEnrollment = !!this.trialStudentId;
+
+console.log("FINAL trialStudentId:", this.trialStudentId);
+console.log("isTrialEnrollment:", this.isTrialEnrollment);
+
     this.service.trialStudentId = this.trialStudentId;
 
     console.log('FeeStructureComponent → StudentId:', this.studentId);
@@ -161,11 +170,54 @@ export class FeeStructureComponent implements OnInit {
 
           if (this.enrolledCourseId) {
             this.courseService.getCourseById(this.enrolledCourseId).subscribe({
-              next: (courseData) => {
-                console.log('CourseData : ', courseData);
-                this.courseFee = courseData.courseFee;
-                this.cdRef.detectChanges();
-              },
+              // next: (courseData) => {
+              //   console.log('CourseData : ', courseData);
+              //   this.courseFee = courseData.courseFee;
+              //   this.cdRef.detectChanges();
+              // },
+               next: (courseData) => {
+
+    const baseFee = courseData.courseFee;
+    this.courseFee = baseFee;
+
+    if (this.isTrialEnrollment) {
+
+      this.trailService.getRegFeeByTrialId(this.trialStudentId).subscribe({
+        next: (feeData: any) => {
+
+
+          console.log("DEBUG — getRegFeeByTrialId() Response:", feeData);
+console.log("DEBUG — feeStatus:", feeData?.feeStatus);
+
+          console.log("Registration Fee Response:", feeData);
+
+         const status = feeData?.feeStatus;
+
+// ✅ 0 = PAID
+if (status === 0) {
+  this.courseFee = baseFee - 1000;
+} else {
+  this.courseFee = baseFee;
+}
+
+
+          console.log("Final Course Fee:", this.courseFee);
+          this.cdRef.detectChanges();
+        },
+        error: () => {
+          
+          this.courseFee = baseFee;
+          this.cdRef.detectChanges();
+        }
+      });
+
+    } else {
+    
+      this.courseFee = baseFee;
+      this.cdRef.detectChanges();
+    }
+  },
+              
               error: (err) => {
                 console.error('Error fetching course data', err);
               }
@@ -205,7 +257,7 @@ export class FeeStructureComponent implements OnInit {
         this.populateInstallments(totalInstallment);  // use registration date now
         this.showTable = true;
         this.cdRef.detectChanges();
-        this.service.enrollmentType='';
+        // this.service.enrollmentType='';
         
       },
       error: (err) => {
@@ -215,26 +267,81 @@ export class FeeStructureComponent implements OnInit {
     });
   }
 
-  populateInstallments(count: number): void {
-    this.installments.clear();
+  autoSplitInstallments(): void {
 
-  if (this.service.enrollmentType === 'trial') {
+
+    if (this.isTrialEnrollment && !this.registrationDate) {
+  console.warn('Waiting for registration date...');
+  return;
+}
+
+  if (!this.courseFee || this.installments.length === 0) return;
+
+  const totalInstallments = this.installments.length;
+
+  const registrationFeePaid =
+    this.isTrialEnrollment &&
+    this.installments.at(0).get('status')?.value === 0 &&
+    this.installments.at(0).get('amount')?.value === 1000;
+
+  const payableCount = registrationFeePaid
+    ? totalInstallments - 1
+    : totalInstallments;
+
+  const totalPayable = this.courseFee;
+  const equalAmount = Math.floor(totalPayable / payableCount);
+  const remainder = totalPayable - (equalAmount * payableCount);
+
+  // 📅 base date (ALWAYS exists)
+  const baseDate = this.registrationDate ?? new Date();
+
+  let payableIndex = 0;
+
+  for (let i = 0; i < totalInstallments; i++) {
+
+    // DATE
+    const date = new Date(baseDate);
+    date.setMonth(baseDate.getMonth() + i);
+    this.installments.at(i).get('dueDate')?.setValue(date);
+
+    // 💰 Skip reg-fee row
+    if (registrationFeePaid && i === 0) continue;
+
+    const amount =
+      payableIndex === payableCount - 1
+        ? equalAmount + remainder
+        : equalAmount;
+
+    this.installments.at(i).get('amount')?.setValue(amount);
+    payableIndex++;
+  }
+
+  this.updateTable();
+  this.cdRef.detectChanges();
+
+  console.log('AUTO SPLIT DONE:', this.installments.value);
+}
+
+populateInstallments(count: number): void {
+  this.installments.clear();
+
+  if (this.isTrialEnrollment) {
+
     this.trailService.getRegFeeByTrialId(this.trialStudentId).subscribe({
       next: (data: any) => {
-        const status = data?.feeStatus ?? 2; // default Pending
-        console.log('feeStatus : ', status);
+
+        const status = data?.feeStatus ?? 2;
 
         if (status === 0) {
-          // Registration fee row (paid)
+
           this.installments.push(
             this.fb.group({
               installmentNumber: [1],
               dueDate: [this.registrationDate ?? new Date(), Validators.required],
               amount: [1000, Validators.required],
-              status: [0] // Paid
+              status: [0]
             })
           );
-          this.updateTable();
 
           for (let i = 2; i <= count + 1; i++) {
             this.installments.push(
@@ -242,31 +349,36 @@ export class FeeStructureComponent implements OnInit {
                 installmentNumber: [i],
                 dueDate: ['', Validators.required],
                 amount: ['', Validators.required],
-                status: [2] // Pending
+                status: [2]
               })
             );
-            this.updateTable();
-            console.log('Installments now:', this.installments.value);
           }
+
         } else {
-          // Registration fee not paid → normal installments
+
           for (let i = 1; i <= count; i++) {
             this.installments.push(
               this.fb.group({
                 installmentNumber: [i],
                 dueDate: ['', Validators.required],
                 amount: ['', Validators.required],
-                status: [2] // Pending
+                status: [2]
               })
             );
-            this.updateTable();
-            console.log('Installments now:', this.installments.value);
           }
         }
 
         this.showTable = true;
-        this.cdRef.detectChanges();   //  force refresh
+        this.cdRef.detectChanges();
+
+        // ⭐ AUTO-SPLIT IMMEDIATELY
+        if (this.installments.length > 0) {
+          this.autoSplitInstallments();
+
+        }
       },
+
+
       error: (err) => {
         console.error('Error fetching registration fee', err);
 
@@ -276,18 +388,22 @@ export class FeeStructureComponent implements OnInit {
               installmentNumber: [i],
               dueDate: ['', Validators.required],
               amount: ['', Validators.required],
-              status: [2] //paid
+              status: [2]
             })
           );
-          this.updateTable();
-          console.log('Installments now:', this.installments.value);
         }
+
         this.showTable = true;
-        this.cdRef.detectChanges();   // 🔑 force refresh even on error
+        this.cdRef.detectChanges();
+
+        // ⭐ also auto split on error case
+       this.autoSplitInstallments();
+
       }
     });
+
   } else {
-    // Non-trial enrollment
+
     for (let i = 1; i <= count; i++) {
       this.installments.push(
         this.fb.group({
@@ -297,13 +413,16 @@ export class FeeStructureComponent implements OnInit {
           status: [2]
         })
       );
-      this.updateTable();
-      console.log('Installments now:', this.installments.value);
     }
+
     this.showTable = true;
     this.cdRef.detectChanges();
+
+    // ⭐ auto split for normal enrollments too
+    this.autoSplitInstallments();
+
   }
-  }
+}
 
 
 //CHANGED
@@ -335,7 +454,43 @@ onFirstAmountChange(index: number): void {
 }
 
   //CHANGED
-  onFirstDueDateChange(index: number): void {
+//   onFirstDueDateChange(index: number): void {
+
+//   if (index !== 0) return;
+
+//   const firstDate = this.installments.at(0).get('dueDate')?.value;
+//   if (!firstDate || !this.courseFee) return;
+
+//   const baseDate = new Date(firstDate);
+//   const totalInstallments = this.installments.length;
+
+  
+//   const equalAmount = Math.floor(this.courseFee / totalInstallments);
+//   const remainder=this.courseFee-(equalAmount * totalInstallments);
+
+//   for (let i = 0; i < totalInstallments; i++) {
+    
+//     const next = new Date(baseDate);
+//     next.setMonth(baseDate.getMonth() + i);
+
+//     //  Handle overflow (Feb 30 → Feb 28)
+//     const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+//     if (baseDate.getDate() > lastDay) next.setDate(lastDay);
+
+//     this.installments.at(i).get('dueDate')?.setValue(next);
+
+//     const amountCtrl = this.installments.at(i).get('amount');
+//     if (amountCtrl){
+
+//     const amount=i ===totalInstallments -1 ? equalAmount + remainder : equalAmount;
+//     amountCtrl.setValue(amount);
+//     }
+//   }
+
+//   this.updateTable(); 
+//   console.log('Auto-filled:', this.installments.value);
+// }
+onFirstDueDateChange(index: number): void {
 
   if (index !== 0) return;
 
@@ -345,44 +500,71 @@ onFirstAmountChange(index: number): void {
   const baseDate = new Date(firstDate);
   const totalInstallments = this.installments.length;
 
-  
-  const equalAmount = Math.floor(this.courseFee / totalInstallments);
-  const remainder=this.courseFee-(equalAmount * totalInstallments);
+  const registrationFeePaid =
+    this.isTrialEnrollment &&
+    this.installments.at(0).get('status')?.value === 0 &&
+    this.installments.at(0).get('amount')?.value === 1000;
+
+  const totalPayable = this.courseFee;
+
+
+  // ✅ Number of installments to distribute amount into
+  const payableInstallmentCount = registrationFeePaid
+    ? totalInstallments - 1
+    : totalInstallments;
+
+  const equalAmount = Math.floor(totalPayable / payableInstallmentCount);
+  const remainder = totalPayable - (equalAmount * payableInstallmentCount);
+
+  let payableIndex = 0;
 
   for (let i = 0; i < totalInstallments; i++) {
-    
+
+    // 📅 Date logic (UNCHANGED)
     const next = new Date(baseDate);
     next.setMonth(baseDate.getMonth() + i);
 
-    //  Handle overflow (Feb 30 → Feb 28)
     const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
     if (baseDate.getDate() > lastDay) next.setDate(lastDay);
 
     this.installments.at(i).get('dueDate')?.setValue(next);
 
-    const amountCtrl = this.installments.at(i).get('amount');
-    if (amountCtrl){
+    // 💰 Skip registration-fee row for amount calculation
+    if (registrationFeePaid && i === 0) continue;
 
-    const amount=i ===totalInstallments -1 ? equalAmount + remainder : equalAmount;
-    amountCtrl.setValue(amount);
-    }
+    const amount =
+      payableIndex === payableInstallmentCount - 1
+        ? equalAmount + remainder
+        : equalAmount;
+
+    this.installments.at(i).get('amount')?.setValue(amount);
+    payableIndex++;
   }
 
-  this.updateTable(); 
+  this.updateTable();
   console.log('Auto-filled:', this.installments.value);
 }
 
 
-
+ isSubmitting = false;
 
   submitInstallments() {
     this.validationErrorMessage = ''; // Clear previous error
 
     const installments = this.installments.value;
 
-    const totalEnteredAmount = installments.reduce((sum: number, inst: any) => {
-      return sum + parseFloat(inst.amount);
-    }, 0);
+
+
+    let totalEnteredAmount = 0;
+
+installments.forEach((inst: any, i: number) => {
+  
+  // Skip registration fee row (paid already)
+  if (this.isTrialEnrollment && i === 0 && inst.amount == 1000) return;
+
+  totalEnteredAmount += parseFloat(inst.amount);
+});
+
 
     const difference = totalEnteredAmount - this.courseFee;
 
@@ -392,8 +574,9 @@ onFirstAmountChange(index: number): void {
         : `Entered amount is ₹${Math.abs(difference)} lesser than Course Fee.`;
 
       return; // stop submission
-    }
 
+    }
+this.isSubmitting = true; // 🔒 lock submit
     const fees = installments.map((inst: any) => ({
       feeStructureId: this.createdFeeStructureId,
       installmentNumber: inst.installmentNumber,
@@ -422,6 +605,7 @@ onFirstAmountChange(index: number): void {
           console.error('Validation Errors:', err.error.errors);
         }
         this.validationErrorMessage = 'Error saving installments';
+          this.isSubmitting = false; // 🔓 unlock on error
       }
     });
   }

@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { experience } from '../../Models/ProfileModels';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 
 @Component({
   selector: 'app-editexperiencendialog',
@@ -16,7 +16,7 @@ export class EditexperiencendialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private studentService: StudentProfileService,
+    private studentService: ReportService,
     public dialogRef: MatDialogRef<EditexperiencendialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: experience
   ) {}

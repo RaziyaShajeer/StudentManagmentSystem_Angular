@@ -237,3 +237,10 @@ mat-card-title {
   }
 }
 
+#ExcelDownload{
+  display: flex;
+  justify-content: flex-end; 
+  margin-top: 0px;
+}
+
+

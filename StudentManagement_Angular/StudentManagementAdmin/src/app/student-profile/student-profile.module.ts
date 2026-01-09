@@ -53,6 +53,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SecondaryContactComponent } from './Components/secondary-contact/secondary-contact.component';
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
 
 
 
@@ -96,7 +97,7 @@ import { SecondaryContactComponent } from './Components/secondary-contact/second
   imports: [
     CommonModule,
     StudentProfileRoutingModule,
-MatSnackBarModule,
+    MatSnackBarModule,
     MatDialogModule,
     MatListModule,
     MatExpansionModule,
@@ -111,22 +112,15 @@ MatSnackBarModule,
     MatSelectModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
-  MatTooltipModule,
-
+    MatTooltipModule,
     MatOptionModule,
-    
-
-
-     MatTableModule,
+    MatTableModule,
     MatDatepickerModule,
     MatNativeDateModule,
-
     FormsModule,
-    
-
     MatGridListModule,
-    
-
-  ]
+    MatAutocompleteModule,
+   
+]
 })
 export class StudentProfileModule { }

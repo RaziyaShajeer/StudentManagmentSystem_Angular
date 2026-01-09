@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { courseDetails, experience, fee, feeStructure, mode, status, qualifications, reference, studentProfile, FeeSummary, InstallmentStatus } from '../../Models/ProfileModels';
 import { FormGroup,FormBuilder,Validators } from '@angular/forms';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,12 +19,14 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { CollegeService } from 'src/app/college/Services/college.service';
 import { college } from 'src/app/college/Models/college';
 import { Course } from 'src/app/course/Models/Course';
+import { Currentstatus } from '../../Models/ProfileModels';
 
 import { of, forkJoin } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
 import { environment } from 'src/app/environment/environment';
+
 
 
 @Component({
@@ -75,6 +77,11 @@ secondaryContactForm!: FormGroup;
   feeStatus = InstallmentStatus;
   mode = mode;
   status = status;
+  companyNames: string[] = [];
+
+
+  Currentstatus = null;
+
   reference = reference;
   referenceKeys: (keyof typeof reference)[] = Object.keys(this.reference).filter(key => isNaN(Number(key))) as (keyof typeof reference)[];
 
@@ -83,9 +90,11 @@ secondaryContactForm!: FormGroup;
   registrationDate: string = new Date().toISOString().substring(0, 10);
   displayedColumnss: string[] = ['courseName', 'batch', 'timeSlot', 'status', 'mode', 'actions'];
 
+
+  
   constructor(
 
-    private studentService: StudentProfileService,
+    private studentService: ReportService,
     public dialog: MatDialog,
     private router: Router,
     private route: ActivatedRoute,
@@ -109,6 +118,33 @@ secondaryContactForm!: FormGroup;
 
   }
 
+  getCurrentStatusValue(value: any): number {
+  if (value === null || value === undefined) return 0;
+
+  // if already number
+  if (typeof value === 'number') return value;
+
+  // if enum-text coming (example: "Placed")
+  if (typeof value === 'string') {
+
+    // try convert "4"
+    const n = parseInt(value, 10);
+    if (!isNaN(n)) return n;
+
+    // handle text enum
+    switch (value.toLowerCase()) {
+      case 'placed': return 4;
+      case 'completed': return 3;
+      case 'ongoing': return 6;
+      case 'dropped': return 5;
+      default: return 0;
+    }
+  }
+
+  return 0;
+}
+
+
   private loadStudentProfile(studentId: string): void {
   this.studentService.getStudentProfileById(studentId).subscribe({
     next: (profile) => {
@@ -120,8 +156,12 @@ secondaryContactForm!: FormGroup;
       }
 
       this.studentProfiles = [profile];
+// profile.currentstatus = Number(profile.currentstatus);
+
+      
       this.selectedStudentProfile = profile;
       console.log('Profile :', profile);
+ console.log('*****Profile sTATUS***** :',profile.currentstatus);
       this.studentReferenceId = profile.studentReferenceId;
 
       // Load related data (qualifications, courses, experiences, fees)
@@ -243,6 +283,15 @@ saveSecondaryContact(): void {
     });
   }
 
+// getCurrentStatusText(value: number | string | null | undefined): string {
+//   if (value === null || value === undefined) ;
+
+//   const numeric = Number(value);   // convert string → number
+//   return Currentstatus[numeric] ?? 'N/A';
+// }
+
+
+
   private loadCourseDetails(studentId: string): void {
     this.studentService.getCourseDetailsByStudentId(studentId).subscribe({
       next: (data: courseDetails[]) => {
@@ -335,7 +384,8 @@ saveSecondaryContact(): void {
         this.studentService.updateStudentProfile(result.updatedProfile.studentId, result.updatedProfile).subscribe({
           next: () => {
             this.showSnackBar('Student profile updated successfully.');
-            this.loadStudentProfile(result.updatedProfile);
+            this.loadStudentProfile(result.updatedProfile.studentId);
+
            
 
             this.cdr.detectChanges();
@@ -620,12 +670,16 @@ getStatusTexts(status: number): string {
   }
 }
 
-getStatusClass(status: number): string {
-  switch (status) {
-    case InstallmentStatus.Paid: return 'text-success';   // green
-    case InstallmentStatus.PartiallyPaid: return 'text-warning'; // yellow
-    case InstallmentStatus.Pending: return 'text-danger'; // red
-    default: return '';
+getStatusClass(status: string): string {
+  switch (status?.toLowerCase()) {
+    case 'paid':
+      return 'text-success';      // green
+    case 'partially paid':
+      return 'text-warning';      // yellow
+    case 'pending':
+      return 'text-danger';       // red
+    default:
+      return '';
   }
 }
 

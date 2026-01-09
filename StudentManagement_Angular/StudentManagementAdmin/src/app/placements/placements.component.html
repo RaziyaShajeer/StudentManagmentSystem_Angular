@@ -1,0 +1,86 @@
+<div class="placements-container container my-4">
+
+  <!-- Heading -->
+  <h1 class="text-center mb-4 placements-title">
+    Placements
+  </h1>
+
+  <!-- Search -->
+  <div class="search-bar-container mb-4 mx-auto">
+    <div class="input-group shadow-sm rounded-pill overflow-hidden">
+      <span class="input-group-text bg-primary text-white border-0 px-4">
+        <i class="bi bi-search"></i>
+      </span>
+
+      <input
+        type="text"
+        class="form-control form-control-lg border-0"
+        placeholder="Search student or company..."
+        [(ngModel)]="searchTerm"
+        (input)="filterPlacements()"
+      />
+    </div>
+  </div>
+
+  <!-- No results -->
+  <div
+    *ngIf="filtered.length === 0 && searchTerm"
+    class="alert alert-warning text-center rounded-pill shadow-sm px-4 py-2 no-result"
+  >
+    No results found for "<strong>{{ searchTerm }}</strong>"
+  </div>
+
+  <!-- Placement Cards -->
+  <div class="row mt-4">
+    <div class="col-md-4 mb-4" *ngFor="let p of filtered">
+
+      <mat-card class="placement-card shadow-sm h-100">
+
+        <!-- Student Photo -->
+        <img
+          mat-card-image
+          [src]="p.photoUrl || 'assets/default-user.png'"
+          alt="Student Photo"
+          class="placement-photo"
+        />
+
+        <!-- Header -->
+        <mat-card-header>
+          <mat-card-title class="placement-name">
+            <mat-icon color="primary">work</mat-icon>
+            {{ p.firstName }} {{ p.lastName }}
+          </mat-card-title>
+        </mat-card-header>
+
+        <!-- Content -->
+        <mat-card-content>
+
+          <p>
+            <mat-icon>email</mat-icon>
+            <strong>Email:</strong> {{ p.email }}
+          </p>
+
+          <p>
+            <mat-icon>phone</mat-icon>
+            <strong>Phone:</strong> {{ p.phone }}
+          </p>
+
+          <p>
+            <mat-icon>business</mat-icon>
+            <strong>Company:</strong> {{ p.companyName }}
+          </p>
+
+          <p>
+            <mat-icon>event</mat-icon>
+            <strong>Joined:</strong>
+            {{ p.placedDate | date:'dd/MM/yyyy' }}
+          </p>
+
+        </mat-card-content>
+
+      </mat-card>
+
+    </div>
+  </div>
+
+</div>

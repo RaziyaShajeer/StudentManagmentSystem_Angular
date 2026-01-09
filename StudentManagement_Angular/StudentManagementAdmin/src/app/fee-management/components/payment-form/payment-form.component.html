@@ -43,23 +43,29 @@
 
     <!-- Course -->
     <div class="form-row">
-      <!-- Enrolled student course select -->
-    <mat-form-field appearance="outline" class="full-width" *ngIf="!feePaymentForm.value.trialStudentId">
+      <!-- Enrolled student course select --><mat-form-field appearance="outline" class="full-width" *ngIf="!feePaymentForm.value.trialStudentId">
   <mat-label>Course</mat-label>
 
   <mat-select formControlName="courseId" (selectionChange)="onCourseSelect($event.value)">
 
-    <mat-select-trigger>
+    <!-- <mat-select-trigger>
       {{ selectedCourse.courseName || 'Select Course' }}
-    </mat-select-trigger>
+
+    </mat-select-trigger> -->
+
+    <mat-select-trigger>
+  {{ selectedCourse?.courseName || 'Select Course' }}
+</mat-select-trigger>
+
 
     <mat-option *ngFor="let c of courseList" [value]="c">
-      {{ c.courseName }}
+      {{ c?.courseName || 'Course' }}
+
     </mat-option>
 
   </mat-select>
-
 </mat-form-field>
+
 
 
       <!-- Trial student readonly course -->

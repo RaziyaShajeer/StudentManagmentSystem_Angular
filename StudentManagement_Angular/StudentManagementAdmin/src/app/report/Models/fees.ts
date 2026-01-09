@@ -24,3 +24,4 @@ export enum InstallmentStatus{
     pending=2,
     partiallyPaid=1
 }
+

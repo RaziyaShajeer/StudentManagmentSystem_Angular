@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { TrialStudentService } from 'src/app/trial-student/Services/trial-student.service';
 import { reference } from '../../Models/ProfileModels';
 import { ProgressTrackerService } from '../../Service/progress-tracker.service';   //ADDED
 import { Subscription } from 'rxjs';
+import { BranchService } from 'src/app/branch/Services/branch.service';
 
 
 @Component({
@@ -24,9 +25,11 @@ errorMessage: string = '';
 //added
 photoFile!: File | null;
 photoPreview: string | ArrayBuffer | null = null;
+branches: any[] = [];
 
-
-
+////
+selectedBranchId: string | null = null;
+selectedBranchName: string | null = null;
 
   enrollmentType: 'trial' | 'direct' = 'direct'; // Default enrollment type
 
@@ -46,30 +49,16 @@ steps: { label: string }[] = [];
  currentStep = 0;
   progressValue = 0; 
     private subs = new Subscription();//ADDED
-     ///****////
-  // steps = [
-  //   { label: 'Basic Info' },
-  //   { label: 'Secondary Contact' },
-  //   { label: 'Qualification' },
-  //   { label: 'Experience' },
-  //   { label: 'Course' },
-  //   { label: 'Fees' },
-  //   { label: 'Feestructure' }
-  // ];
-
-  // currentStep = 0;
-
-  // get progressValue(): number {
-  //   return (this.currentStep / (this.steps.length - 1)) * 100;
-  // }
+     
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private profileService: StudentProfileService,
+    private profileService: ReportService,
     private trialStudentService: TrialStudentService,
     private router: Router,
-    private progressService:ProgressTrackerService   //added
+    private progressService:ProgressTrackerService,
+    private branchService:BranchService   //added
   ) { }
 
   ngOnInit(): void {
@@ -81,8 +70,14 @@ steps: { label: string }[] = [];
       this.progressValue = this.progressService.getProgressValue(step);
     });
     this.subs.add(stepSub);
-          ///****////
-    // this.currentStep=0;  //added
+    this.loadBranches(); 
+        
+     this.selectedBranchId = localStorage.getItem('selectedBranchId');
+  if (this.selectedBranchId) {
+    const branch = this.branches.find(b => b.branchId === this.selectedBranchId);
+    this.selectedBranchName = branch ? branch.branchName : null;
+  }
+
     this.route.queryParams.subscribe(params => {
     const trialId = params['trialStudentId'];
     if (trialId) {
@@ -102,6 +97,7 @@ steps: { label: string }[] = [];
       phone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       dob: ['', [Validators.required, this.minimumAgeValidator(16)]],
       referredBy: [null, Validators.required],
+     branchId: ['', Validators.required],
     });
 
     if (this.trialStudentId) {
@@ -117,12 +113,27 @@ steps: { label: string }[] = [];
     }
   }
 
-  // Navigate to Trial Students list
+loadBranches() {
+  this.branchService.getAllBranches().subscribe(res => {
+    this.branches = res;
+
+    const storedBranchId = localStorage.getItem('selectedBranchId');
+    if (storedBranchId) {
+      this.ProfileForm.patchValue({ branchId: storedBranchId });
+      this.selectedBranchId = storedBranchId;
+
+      const branch = this.branches.find(b => b.branchId === storedBranchId);
+      this.selectedBranchName = branch ? branch.branchName : null;
+    }
+  });
+}
+
+  
   goToTrialStudentList() {
     this.router.navigate(['/home/trialStudent/ViewTrialStudent']);
   }
 
-  // Minimum age validator
+
   minimumAgeValidator(minAge: number): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const dob = new Date(control.value);
@@ -189,24 +200,21 @@ onFileSelected(event: any): void {
     reader.readAsDataURL(file);
   }
 }
-
-
-
-
-
-
+isSubmitting = false;
 //changed all
 onSubmit() {
   if (this.ProfileForm.valid) {
     const formValue = this.ProfileForm.value;
     const formData = new FormData();
-
+this.isSubmitting = true; // 🔒 lock submit
     // Append text fields
     formData.append('firstName', formValue.firstName);
     formData.append('lastName', formValue.lastName);
     formData.append('address', formValue.address);
     formData.append('email', formValue.email);
     formData.append('phone', formValue.phone);
+    formData.append('branchId', formValue.branchId);
+
 
     // Format Date of Birth (convert to YYYY-MM-DD)
  if (formValue.dob) {
@@ -244,8 +252,6 @@ onSubmit() {
           console.warn(' No photo URL returned from backend');
         }
 
-        // Navigate to next step
-        // if (this.studentId && this.studentId !== '00000000-0000-0000-0000-000000000000') {
         
         if (this.studentId && this.studentId !== '00000000-0000-0000-0000-000000000000'){
       this.router.navigate(['/home/studentProfile/secondary-contact', this.studentId]); //changed
@@ -261,44 +267,4 @@ onSubmit() {
   }
 }
 
-
-
-  // onSubmit() {
-  //   if (this.ProfileForm.valid) {
-  //     const formValue = this.ProfileForm.value;
-
-  //     const data = {
-  //       trialStudentId: this.enrollmentType === 'trial' && this.hasSelectedTrialStudent ? this.trialStudentId : null,
-  //       enrollmentType: this.enrollmentType === 'trial' ? 1 : 0, // 0 = trial, 1 = direct
-  //       firstName: formValue.firstName,
-  //       lastName: formValue.lastName,
-  //       address: formValue.address,
-  //       email: formValue.email,
-  //       phone: formValue.phone,
-  //       dob: formValue.dob
-  //         ? new Date(formValue.dob.getTime() - (formValue.dob.getTimezoneOffset() * 60000))
-  //             .toISOString()
-  //             .split('T')[0]
-  //         : null,
-  //       referredBy: formValue.referredBy
-  //     };
-
-  //     this.profileService.addStudentProfile(data).subscribe({
-  //       next: (response) => {
-  //         this.studentId = response.studentId;
-  //         this.profileService.studentId = this.studentId;
-
-  //         if (this.studentId && this.studentId !== '00000000-0000-0000-0000-000000000000') {
-  //           this.router.navigate(['/home/studentProfile/qualification', this.studentId]);
-  //         } else {
-  //           alert("Student ID not returned correctly.");
-  //         }
-  //       },
-  //       error: (err) => {
-  //         console.error("Error while adding profile:", err);
-  //         alert("Failed to add student profile. Please check the input or try again later.");
-  //       }
-  //     });
-  //   }
-  // }
 }

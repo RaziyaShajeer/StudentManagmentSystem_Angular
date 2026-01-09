@@ -95,6 +95,10 @@
   margin-top: 1.5rem;
   text-align: right;
 }
+.phone-width {
+  width: 100%;
+  max-width: 800px;
+}
 
 
 

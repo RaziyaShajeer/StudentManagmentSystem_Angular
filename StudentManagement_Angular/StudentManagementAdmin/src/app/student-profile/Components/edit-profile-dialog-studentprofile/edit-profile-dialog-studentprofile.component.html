@@ -23,6 +23,25 @@
         <mat-error *ngIf="profileForm.get('address')?.hasError('required')">Address is required</mat-error>
       </mat-form-field>
 
+<!-- branch -->
+<mat-form-field appearance="outline" class="full-width">
+  <mat-label>Branch</mat-label>
+
+  <mat-select formControlName="branchId">
+    <mat-option *ngFor="let b of branches" [value]="b.branchId">
+      {{ b.branchName }}
+    </mat-option>
+  </mat-select>
+
+  <mat-error *ngIf="profileForm.get('branchId')?.invalid">
+    Branch is required
+  </mat-error>
+</mat-form-field>
+
+
+
+
+
       <!-- Email -->
       <mat-form-field appearance="outline" class="form-group">
         <mat-label>Email</mat-label>
@@ -63,9 +82,33 @@
         </mat-select>
         <mat-error *ngIf="profileForm.get('referredBy')?.hasError('required')">Referred By is required</mat-error>
       </mat-form-field>
-    </div>
+   
+<!-- Status -->
+<mat-form-field appearance="outline" class="form-group">
+  <mat-label>Status</mat-label>
+
+<mat-select formControlName="currentstatus">
+  <mat-option *ngFor="let s of statusList" [value]="Currentstatus[s]">
+    {{ s }}
+  </mat-option>
+</mat-select>
+
+
+</mat-form-field>
+
+<!-- Placed Company -->
+<mat-form-field
+  appearance="outline"
+  class="form-group"
+  *ngIf="profileForm.value.currentstatus === 4">
+  <mat-label>Placed Company</mat-label>
+  <textarea matInput formControlName="companyName"></textarea>
+</mat-form-field>
+
+ </div>
   </form>
 </mat-dialog-content>
+
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>

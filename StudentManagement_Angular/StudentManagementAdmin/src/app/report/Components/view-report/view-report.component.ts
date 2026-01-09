@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { feeStructure } from 'src/app/student-profile/Models/ProfileModels';
-import { StudentProfileService } from 'src/app/student-profile/Service/student-profile.service';
 import { fees,InstallmentStatus } from '../../Models/fees';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ReportService } from '../../Services/report.service';
 
+
+import { FinalReportDTO } from '../../Models/final-report.model';
+import { StudentFeeSummary } from '../../Models/student-fee-summary.model';
 
 @Component({
   selector: 'app-view-report',
@@ -16,110 +17,84 @@ export class ViewReportComponent implements OnInit{
 
   
   fee:any[]=[];
+finalReport?:FinalReportDTO;
+allStudents: any[] = [];
+summarizedFees: any[] = [];
+students: StudentFeeSummary[] = [];
+
   public feeStatus=InstallmentStatus;
   searchForm!:FormGroup
   filterFee:any[]=[]
-  summarizedFees: any[] = [];  //added
-  feeStructureId!:string
+
+    //added
   studentId!:string
   constructor(
-    private service:StudentProfileService,
+    private service:ReportService,
     private router:Router,
     private fb:FormBuilder,
     private reportService:ReportService){}
 
 ngOnInit(): void {
-  this.service.getAllFees().subscribe(data => {
-    console.log('Received fees data:', data);
-    this.fee = data;
-    this.filterFee = this.fee;
+  // this.service.getAllFees().subscribe(data => {
+  //   console.log('Received fees data:', data);
+  //   this.fee = data;
+  //   this.filterFee = this.fee;
 
     
-    this.summarizeFeesByStudent();
-  });
-  
+  //   this.summarizeFeesByStudent();
+
+  // this.searchForm = this.fb.group({
+  //   fromDate: [''],
+  //   toDate: [''],
+  //   status: [''],
+  //   branch: ['']
+
+
+  // // this.loadAllFees();
+  // }
+  // );
+
+
   this.searchForm = this.fb.group({
     fromDate: [''],
     toDate: [''],
-    status: ['']
+    status: [''],
+      branchId: ['ALL']  // default = All
+
   });
+
+  this.loadAllTimeData();
+  this.loadBranches();
 }
+branches: any[] = [];
 
 
 
 //added
-summarizeFeesByStudent(): void {
-  const grouped: { [key: string]: any } = {};
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  for (const item of this.filterFee) {
-    
-    const studentKey = item.studentId ?? item.studentName ?? 'Unknown';
-
-    // Create group if it doesn’t exist
-    if (!grouped[studentKey]) {
-  grouped[studentKey] = {
-    studentId: item.studentId ?? 'N/A',
-    studentName: item.studentName || 'Unknown',
-    paidAmount: 0,
-    balance: 0,
-    overdue: 0,
-    totalDue: 0,
-    feeStructureId: item.feeStructureId ?? ''
-  };
-}
-
-
-    // Normalize due date
-    const dueDate =
-      typeof item.dueDate === 'string'
-        ? new Date(item.dueDate)
-        : item.dueDate instanceof Date
-        ? item.dueDate
-        : new Date();
-    dueDate.setHours(0, 0, 0, 0);
-
-
-    grouped[studentKey].paidAmount += item.amountReceived ?? 0;
-    grouped[studentKey].totalDue += item.amount ?? 0;
-    grouped[studentKey].balance =
-      grouped[studentKey].totalDue - grouped[studentKey].paidAmount;
-
-    
-    const isNotFullyPaid = item.status === 1 || item.status === 2;
-    const isPastDue = dueDate < today;
-
-    if (isNotFullyPaid && isPastDue && item.dueAmount > 0) {
-      grouped[studentKey].overdue += item.dueAmount;
-    }
-  }
-
-  this.summarizedFees = Object.values(grouped);
-  console.log('✅ Summarized Fees (with IDs):', this.summarizedFees);
-}
-
 // summarizeFeesByStudent(): void {
 //   const grouped: { [key: string]: any } = {};
 //   const today = new Date();
 //   today.setHours(0, 0, 0, 0);
 
 //   for (const item of this.filterFee) {
-//     const studentKey = item.studentName || 'Unknown Student';
+    
+//     const studentKey = item.studentId ?? item.studentName ?? 'Unknown';
 
+//     // Create group if it doesn’t exist
 //     if (!grouped[studentKey]) {
-//       grouped[studentKey] = {
-//         studentName: studentKey,
-//         paidAmount: 0,
-//         balance: 0,
-//         overdue: 0,
-//         totalDue: 0,
-//         studentId: item.studentId ?? '',
-//         feeStructureId: item.feeStructureId ?? ''
-//       };
-//     }
+//   grouped[studentKey] = {
+//     studentId: item.studentId ?? 'N/A',
+//     studentName: item.studentName || 'Unknown',
+//     paidAmount: 0,
+//     balance: 0,
+//     overdue: 0,
+//     totalDue: 0,
+//     feeStructureId: item.feeStructureId ?? ''
+//   };
+// }
 
-//     // Parse and normalize due date
+
+//     // Normalize due date
 //     const dueDate =
 //       typeof item.dueDate === 'string'
 //         ? new Date(item.dueDate)
@@ -128,15 +103,14 @@ summarizeFeesByStudent(): void {
 //         : new Date();
 //     dueDate.setHours(0, 0, 0, 0);
 
-//     // Calculate totals
+
 //     grouped[studentKey].paidAmount += item.amountReceived ?? 0;
 //     grouped[studentKey].totalDue += item.amount ?? 0;
 //     grouped[studentKey].balance =
 //       grouped[studentKey].totalDue - grouped[studentKey].paidAmount;
 
-//     //  Overdue logic (for both Pending and PartiallyPaid)
-//     const isNotFullyPaid =
-//       item.status === 1 || item.status === 2; 
+    
+//     const isNotFullyPaid = item.status === 1 || item.status === 2;
 //     const isPastDue = dueDate < today;
 
 //     if (isNotFullyPaid && isPastDue && item.dueAmount > 0) {
@@ -145,36 +119,226 @@ summarizeFeesByStudent(): void {
 //   }
 
 //   this.summarizedFees = Object.values(grouped);
-//   console.log('✅ Summarized Fees:', this.summarizedFees);
+//   console.log(' Summarized Fees (with IDs):', this.summarizedFees);
 // }
 
 
-onSearch() {
-  const { fromDate, toDate, status } = this.searchForm.value;
+// onSearch() {
+//   const { fromDate, toDate, status,branch } = this.searchForm.value;
 
-  if (!fromDate || !toDate) {
-    alert("Please select both From and To dates.");
-    return;
+//   if (!fromDate || !toDate) {
+//     alert("Please select both From and To dates.");
+//     return;
+//   }
+
+//   const parsedFromDate = new Date(fromDate);
+//   const parsedToDate = new Date(toDate);
+
+//   parsedFromDate.setHours(0, 0, 0, 0);
+//   parsedToDate.setHours(23, 59, 59, 999);
+
+//   this.reportService.getFeesByCriteria(parsedFromDate, parsedToDate, status).subscribe({
+//     next: data => {
+
+//       let result=data;
+//       if (branch && branch.trim() !== '') {
+//         result = result.filter(
+//           (f: any) => f.branchName?.toLowerCase() === branch.toLowerCase()
+//         );
+      
+//       }
+//           this.filterFee = result;
+//       // this.filterFee = data;
+//       this.summarizeFeesByStudent(); 
+//     },
+//     error: err => {
+//       console.error(err);
+//       this.filterFee = [];
+//       this.summarizedFees = []; 
+//     }
+//   });
+// }
+//  loadAllFees() {
+//     this.reportService.getFinalFeeReport().subscribe({
+//       next: (res: any) => {
+//         console.log('DEFAULT LOAD:', res);
+//         this.summarizedFees = res.studentIndividualfees ?? [];
+//       },
+//       error: err => {
+//         console.error(err);
+//         this.summarizedFees = [];
+//       }
+//     });
+//   }
+
+ loadAllTimeData() {
+    this.reportService.getFinalFeeReport().subscribe({
+      next: (res: any) => {
+        this.finalReport = res;
+
+        // full list
+        this.allStudents = res.studentIndividulfees ?? [];
+
+        // default table data
+        this.summarizedFees = [...this.allStudents];
+      },
+      error: () => {
+        this.allStudents = [];
+        this.summarizedFees = [];
+      }
+    });
   }
 
-  const parsedFromDate = new Date(fromDate);
-  const parsedToDate = new Date(toDate);
+  loadBranches(): void {
+  this.reportService.getBranches()
+   
+    .subscribe({
+      next: data => this.branches = data,
+      error: err => console.error('Failed to load branches', err)
+    });
+}
 
-  parsedFromDate.setHours(0, 0, 0, 0);
-  parsedToDate.setHours(23, 59, 59, 999);
+downloadExcel() {
 
-  this.reportService.getFeesByCriteria(parsedFromDate, parsedToDate, status).subscribe({
-    next: data => {
-      this.filterFee = data;
-      this.summarizeFeesByStudent(); 
+   const { fromDate, toDate, status, branch } = this.searchForm.value;
+   if ((!fromDate && toDate)||(fromDate && !toDate)) {
+    alert('Select both dates');
+    return;
+  }
+  const startDate = fromDate.toISOString().split('T')[0];
+  const endDate = toDate.toISOString().split('T')[0];
+console.log("Date selected");
+
+  this.reportService.downloadFeeExcel(startDate, endDate, status, branch).subscribe({
+    next: (blob: Blob) => {
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Fees.xlsx'; // you can change name
+      a.click();
+
+      window.URL.revokeObjectURL(url);
     },
     error: err => {
-      console.error(err);
-      this.filterFee = [];
-      this.summarizedFees = []; 
+      console.error('Excel download failed', err);
     }
   });
 }
+
+viewStudent(student: any) {
+  console.log('Clicked student:', student);
+
+  this.router.navigate([
+    '/home/report/student-report',
+    student.studentId
+  ]);
+}
+
+
+
+
+
+
+
+
+
+
+// viewStudent(student: any) {
+//   console.log('Clicked student:', student);
+
+//   if (!student.feeStructureId) {
+//     console.error('Missing feeStructureId', student);
+//     return;
+//   }
+
+//   this.router.navigate([
+//     '/home/report/student-report',
+//     student.feeStructureId
+//   ]);
+// }
+
+
+
+onSearch() {
+  const { fromDate, toDate } = this.searchForm.value;
+
+  if ((!fromDate && toDate)||(fromDate && !toDate)) {
+    alert('Please select both From and To dates.');
+    return;
+  }
+
+  this.reportService.getFinalFeeReport().subscribe({
+    next: (res: any) => {
+      console.log('REPORT RESPONSE:', res);
+
+      // totals
+      this.finalReport = res;
+
+      // student rows (EXACT name from Swagger)
+      this.summarizedFees = res.studentIndividualfees ?? [];
+    },
+    error: err => {
+      console.error('API ERROR:', err);
+      this.finalReport = undefined;
+      this.summarizedFees = [];
+    }
+  });
+
+  // this.loadAllFees();
+}
+
+onSearchFeesNew() {
+  const { fromDate, toDate, status, branchId } = this.searchForm.value;
+
+
+  if (!fromDate && !toDate && !status && !branchId) {
+    alert('choose atleastanything');
+    return;
+  }
+
+  if ((fromDate && !toDate) || (!fromDate && toDate)) {
+    alert('Please select both From and To dates');
+    return;
+  }
+  const finalBranchId = branchId === 'ALL' ? null : branchId;
+  
+  let startDate: string | undefined;
+  let endDate: string | undefined;
+
+
+
+  if (fromDate && toDate) {
+    startDate = new Date(fromDate).toISOString().slice(0, 10);
+    endDate   = new Date(toDate).toISOString().slice(0, 10);
+  }
+
+  this.reportService
+    .searchFeesWithFilters(startDate, endDate, status, finalBranchId)
+    .subscribe({
+      next: (res: FinalReportDTO) => {
+        this.summarizedFees = res.studentIndividulfees ?? [];
+
+        this.finalReport =
+          this.summarizedFees.length === 0
+            ? {
+                totalAmountPaid: 0,
+                totalBalanceAmount: 0,
+                totalDueAmount: 0,
+                totalFees: 0,
+                studentIndividulfees: []
+              }
+            : res;
+      },
+      error: err => {
+        console.error('Search failed', err);
+        this.summarizedFees = [];
+      }
+    });
+}
+
+
+
 
 
 getTodayTotalCollection(): number {
@@ -269,31 +433,28 @@ getMonthPending(): number {
   return total;
 }
 
-viewDetails(student: any): void {
-  if (!student.feeStructureId) {
-    console.warn('No feeStructureId found for student:', student);
-    return;
-  }
+// viewDetails(student: any): void {
+//   if (!student.feeStructureId) {
+//     console.warn('No feeStructureId found for student:', student);
+//     return;
+//   }
 
-  this.service.getFeeStructureById(student.feeStructureId).subscribe({
-    next: (response) => {
-      this.studentId = response.studentId;
-      this.router.navigate(['/home/report/student-report', this.studentId]);
-    },
-    error: (err) => {
-      console.error('Failed to fetch fee structure:', err);
-    }
-  });
-}
-
+//   this.service.getFeeStructureById(student.feeStructureId).subscribe({
+//     next: (response) => {
+//       this.studentId = response.studentId;
+//       this.router.navigate(['/home/report/student-report', this.studentId]);
+//     },
+//     error: (err) => {
+//       console.error('Failed to fetch fee structure:', err);
+//     }
+//   });
+// }
 
 
 
 displayedColumns: string[] = ['studentId', 'studentName', 'courseName', 'amount', 'balance', 'dueDate', 'status', 'detail'];
 
 
-
-  
   getRowClass(row: any): string {
   const today = new Date();
   const dueDate = this.parseLocalDate(row.dueDate);
@@ -353,4 +514,34 @@ parseLocalDated(input: string | Date): Date {
 
   throw new Error('Invalid date format');
 }
+
+//final row
+getTotalPaid(): number {
+  return this.summarizedFees.reduce(
+    (sum, s) => sum + (s.paidAmount || 0),
+    0
+  );
+}
+
+getTotalBalance(): number {
+  return this.summarizedFees.reduce(
+    (sum, s) => sum + (s.balance || 0),
+    0
+  );
+}
+
+getTotalOverdue(): number {
+  return this.summarizedFees.reduce(
+    (sum, s) => sum + (s.overdue || 0),
+    0
+  );
+}
+
+getGrandTotal(): number {
+  return this.summarizedFees.reduce(
+    (sum, s) => sum + (s.totalDue || 0),
+    0
+  );
+}
+
 }

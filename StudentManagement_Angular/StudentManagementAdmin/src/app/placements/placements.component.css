@@ -1,0 +1,43 @@
+.placements-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  color: #5984f0;
+}
+
+.search-bar-container {
+  max-width: 600px;
+}
+
+.no-result {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.placement-card {
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.placement-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.placement-photo {
+  height: 220px;
+  object-fit: cover;
+}
+
+.placement-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+mat-card-content p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}

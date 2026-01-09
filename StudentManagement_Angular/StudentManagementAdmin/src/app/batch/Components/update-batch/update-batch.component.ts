@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BatchService } from '../../Services/batch.service';
+import { BranchService } from 'src/app/branch/Services/branch.service';
 
 @Component({
   selector: 'app-update-batch',
@@ -13,12 +14,14 @@ export class UpdateBatchComponent implements OnInit{
 
     batchForm!: FormGroup;
     batchId!: any;
+    branches:any[]=[];
 
     constructor(
         private fb: FormBuilder,
         private route: ActivatedRoute,
         private batchService: BatchService,
-        private router: Router
+        private router: Router,
+        private branchService:BranchService
       ) {}
     
       ngOnInit(): void {
@@ -31,10 +34,11 @@ export class UpdateBatchComponent implements OnInit{
       batchTimeTo: ['', Validators.required],
       batchTimeToPeriod: ['PM', Validators.required],
           batchDescription: ['', Validators.required],
+              branchId: ['', Validators.required], 
           
         });
         
-    
+          this.loadBranches();
         this.loadCourseData();
       }
       loadCourseData() {
@@ -48,12 +52,19 @@ export class UpdateBatchComponent implements OnInit{
           batchTimeFromPeriod: fromPeriod,
           batchTimeTo: toTime,
           batchTimeToPeriod: toPeriod,
-           batchDescription:data.batchDescription
+           batchDescription:data.batchDescription,
+             branchId: data.branchId, 
             
           });
-        });
-        
+        });   
       }
+
+          loadBranches() {
+          this.branchService.getAllBranches().subscribe((res: any) => {
+          this.branches = res;
+         });
+        }
+
        onSubmit() {
         if (this.batchForm.valid) {
           const formValue = this.batchForm.value;
@@ -62,7 +73,9 @@ export class UpdateBatchComponent implements OnInit{
             batchId: this.batchId,
           batchName: formValue.batchName,
           batchTime: batchTime,
-          batchDescription:formValue.batchDescription
+          batchDescription:formValue.batchDescription,
+            branchId: formValue.branchId,
+          
           
           };
             this.batchService.updateBatch(this.batchId, updatedBatch).subscribe(() => {

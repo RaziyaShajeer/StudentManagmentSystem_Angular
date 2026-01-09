@@ -18,6 +18,17 @@
         </mat-form-field>
       </div>
 
+      <!-- selectbranch -->
+      <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Select Branch</mat-label>
+      <mat-select formControlName="branchId">
+      <mat-option *ngFor="let b of branches" [value]="b.branchId">
+      {{ b.branchName }}
+      </mat-option>
+      </mat-select>
+      </mat-form-field>
+
+
       <!-- Batch Time Row -->
       <div class="form-row">
         <label class="time-label">Batch Time</label>
@@ -75,6 +86,8 @@
       <div *ngIf="errorMessage" style="color: red; margin-bottom: 16px;">
         {{errorMessage}}
       </div>
+
+
       <!-- Submit Button -->
       <div class="form-actions">
         <button mat-raised-button color="primary" type="submit" [disabled]="batchForm.invalid">

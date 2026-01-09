@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute,Router } from '@angular/router';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { BatchService } from 'src/app/batch/Services/batch.service';
 import { CourseService } from 'src/app/course/Services/course.service';
 import { status, mode } from '../../Models/ProfileModels';
@@ -65,7 +65,7 @@ export class CourseDetailsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private studentProfileService: StudentProfileService,
+    private studentProfileService: ReportService,
     private batchService: BatchService,
     private courseService: CourseService,
     private trialService: TrialStudentService,
@@ -139,8 +139,15 @@ this.progressService.setStep(4);
     });
   }
 
+ isSubmitting = false;
+
+
   onSubmit(): void {
-    if (this.courseDetailsForm.valid) {
+    if (this.courseDetailsForm.invalid || this.isSubmitting)
+    {
+      return;
+    }
+    this.isSubmitting = true; // 🔒 lock submit
       const formData = this.courseDetailsForm.getRawValue();
 
       this.studentProfileService.addCourseDetails(formData).subscribe({
@@ -157,8 +164,8 @@ this.progressService.setStep(4);
         error: err => {
           console.error('Error saving course details:', err);
           alert('Error saving course details.');
+              this.isSubmitting = false; // 🔓 unlock on error
         }
       });
     }
   }
-}

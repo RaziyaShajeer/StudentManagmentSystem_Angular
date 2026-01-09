@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StudentProfileService } from 'src/app/student-profile/Service/student-profile.service';
+import { ReportService } from 'src/app/student-profile/Service/student-profile.service';
 import { TrialStudentService } from 'src/app/trial-student/Services/trial-student.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MailService } from '../../Services/mail.service';
@@ -14,7 +14,7 @@ export class TodayDueComponent implements OnInit{
   pendingList: any[] = [];
   selection = new SelectionModel<any>(true, []); // Allow multi-select
 
-  constructor(private feeService:StudentProfileService,private mailService:MailService){}
+  constructor(private feeService:ReportService,private mailService:MailService){}
   ngOnInit(): void {
    
     this.loadTodayPendingFees();

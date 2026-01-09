@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { experience } from '../../Models/ProfileModels';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProgressTrackerService } from '../../Service/progress-tracker.service';
@@ -44,7 +44,7 @@ export class ExperienceComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private studentService: StudentProfileService,
+    private studentService: ReportService,
     private router: Router,
     private route: ActivatedRoute,
     private progressService: ProgressTrackerService
@@ -111,14 +111,19 @@ export class ExperienceComponent implements OnInit {
   get totalExperienceErrors() {
     return this.experienceForm.get('totalExperience')?.errors;
   }
-
+ isSubmitting = false;
   onSubmit() {
-    if (this.experienceForm.valid && this.studentId) {
+    if(this.experienceForm.invalid||this.isSubmitting)
+    {
+      return;
+    }
+    if (this.experienceForm.valid && this.studentId||this.isSubmitting){
       const newExperience: experience = {
         ...this.experienceForm.value,
         studentId: this.studentId
+        
       };
-
+ this.isSubmitting = true; // 🔒 lock submit
       this.studentService.addExperience(newExperience).subscribe({
         next: (response) => {
           this.studentService.updateStudentData({ experience: newExperience });
@@ -132,6 +137,7 @@ export class ExperienceComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error adding new experience:', error);
+           this.isSubmitting = false; // 🔓 unlock on error
         }
       });
     } else {

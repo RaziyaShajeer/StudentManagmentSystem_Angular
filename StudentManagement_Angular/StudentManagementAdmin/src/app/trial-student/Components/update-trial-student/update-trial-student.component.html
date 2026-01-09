@@ -12,6 +12,18 @@
       <input id="lastName" formControlName="lastName" type="text" />
     </div>
 
+    <div class="form-group">
+  <label for="branch">Branch</label>
+  <select id="branch" class="form-control" formControlName="branchId">
+    <option value="" disabled>Select branch</option>
+
+    <option *ngFor="let branch of branches" [value]="branch.branchId">
+      {{ branch.branchName }}
+    </option>
+  </select>
+</div>
+
+
 
     <div class="form-group">
       <label for="email">Email</label>

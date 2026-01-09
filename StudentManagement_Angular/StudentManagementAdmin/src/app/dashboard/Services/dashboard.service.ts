@@ -6,11 +6,15 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = 'https://localhost:7183/api/v1/dashboard'; // Adjust as needed
+  private apiUrl = 'https://localhost:7183/api/v1/dashboard';
+  private baseUrl = 'https://localhost:7183/api/v1/placements'; 
 
   constructor(private http: HttpClient) {}
 
   getDashboardStats(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
+
+ 
+
 }

@@ -18,6 +18,17 @@
         </mat-form-field>
       </div>
 
+      <!-- Select Branch -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Select Branch</mat-label>
+      <mat-select formControlName="branchId" required>
+      <mat-option *ngFor="let b of branches" [value]="b.branchId">
+      {{ b.branchName }}
+      </mat-option>
+    </mat-select>
+    </mat-form-field>
+
+
       <div class="form-row">
         <label class="time-label">Batch Time</label>
         <div class="time-period-row">

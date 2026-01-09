@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors }
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { qualifications } from '../../Models/ProfileModels';
 import { CollegeService } from 'src/app/college/Services/college.service';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 
 @Component({
   selector: 'app-editqualificationdialog',
@@ -23,7 +23,7 @@ export class EditqualificationdialogComponent implements OnInit {
     public dialogRef: MatDialogRef<EditqualificationdialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: qualifications,
     private collegeService: CollegeService,
-    private studentProfileService: StudentProfileService,
+    private studentProfileService: ReportService,
     private cdr: ChangeDetectorRef
   ) {
     this.qualificationForm = this.fb.group({
