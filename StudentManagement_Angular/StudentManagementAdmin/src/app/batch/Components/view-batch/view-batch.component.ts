@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { batch } from '../../Models/batch';
 import { BatchService } from '../../Services/batch.service';
 import { Router } from '@angular/router';
+import { BranchService } from 'src/app/branch/Services/branch.service';
 
 @Component({
   selector: 'app-view-batch',
@@ -14,11 +15,13 @@ export class ViewBatchComponent implements OnInit {
   filteredList: batch[] = [];
   searchTerm: string = '';
   showBatchList: boolean = false;
+  branches:any[]=[];
 
-  constructor(private service: BatchService, private router: Router) {}
+  constructor(private service: BatchService, private router: Router,private branchservice:BranchService) {}
 
   ngOnInit(): void {
     this.getBatches();
+    this.getBranches();
   }
 
   getBatches() {
@@ -31,6 +34,24 @@ export class ViewBatchComponent implements OnInit {
         console.error("Error fetching data");
       }
     });
+  }
+
+  getBranches() {
+    this.branchservice.getAllBranches().subscribe({
+      next: (res) => {
+        this.branches = res;
+        // After branches are loaded, fetch batches
+        this.getBatches();
+      },
+      error: () => {
+        console.error('Error fetching branches');
+      }
+    });
+  }
+
+   getBranchName(branchId: string): string {
+    const branch = this.branches.find(b => b.branchId === branchId);
+    return branch ? branch.branchName : 'Unknown';
   }
 
   onSearchInput(event: Event) {

@@ -88,7 +88,8 @@ hasPaidRegistrationFee(trialStudentId: string): Observable<boolean> {
 getRegFeeByTrialId(trialStudentId:string):Observable<any>{
   return this.http.get(`${environment.baseurl}/RegistrationFee/${trialStudentId}`)
 }
-  
+ 
+
   }
   
 

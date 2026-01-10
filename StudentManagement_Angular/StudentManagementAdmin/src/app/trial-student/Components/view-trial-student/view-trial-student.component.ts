@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TrialStudentService } from '../../Services/trial-student.service';
 import { trialStudent } from '../../Models/trialStudent';
-import { StudentProfileService } from 'src/app/student-profile/Service/student-profile.service';
+import { ReportService } from 'src/app/student-profile/Service/student-profile.service';
 
 @Component({
   selector: 'app-trial-student-list',
@@ -24,7 +24,7 @@ export class TrialStudentListComponent implements OnInit {
   constructor(
     private studentService: TrialStudentService,
     private router: Router,
-    private profileService: StudentProfileService,
+    private profileService: ReportService,
     private dialog: MatDialog
   ) {}
 

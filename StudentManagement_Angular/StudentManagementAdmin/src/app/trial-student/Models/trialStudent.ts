@@ -5,7 +5,11 @@ export interface trialStudent{
     address: string;
     email: string;
     phone: string;
-    status: StudentStatus;
+    // status: StudentStatus;
+    branchId: string;
+
+     status: string;
+  companyName?: string | null;
 }
 export enum StudentStatus {
   Registered = 'Registered',

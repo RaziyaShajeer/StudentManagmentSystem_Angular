@@ -65,6 +65,11 @@
             <strong>Description:</strong>
             {{ batch.batchDescription || 'No description available' }}
           </p>
+
+          <p class="batch-branch mb-2">
+           <mat-icon class="bi bi-building-fill me-2">building</mat-icon>
+            <strong>Branch:</strong> {{ getBranchName(batch.branchId) }}
+          </p>
         </mat-card-content>
 
         <mat-card-actions class="d-flex justify-content-end px-3 pb-3">

@@ -1,7 +1,7 @@
 import { Component,OnInit } from '@angular/core';
 import { FormBuilder,FormGroup,Validators } from '@angular/forms';
 import { ActivatedRoute,Router } from '@angular/router';
-import { StudentProfileService } from '../../Service/student-profile.service';
+import { ReportService } from '../../Service/student-profile.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProgressTrackerService } from '../../Service/progress-tracker.service';
 import { Subscription } from 'rxjs';
@@ -12,7 +12,8 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./secondary-contact.component.css']
 })
 export class SecondaryContactComponent implements OnInit 
-{ contactForm!: FormGroup;
+{ 
+  contactForm!: FormGroup;
   studentId!: string;
 
 
@@ -23,28 +24,15 @@ export class SecondaryContactComponent implements OnInit
 
   private subs = new Subscription();
 ////******* */
-// steps = [
-//   { label: 'Basic Info' },
-//   { label: 'Secondary Contact' },
-//   { label: 'Qualification' },
-//   { label: 'Experience' },
-//   { label: 'Course' },
-//   { label: 'Fees' },
-//   { label: 'Feestructure' }
-// ];
 
-// currentStep = 1;
 
-// get progressValue(): number {
-//   return (this.currentStep / (this.steps.length - 1)) * 100;
-// }
 
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private profileService: StudentProfileService,
+    private profileService: ReportService,
     private snackBar: MatSnackBar,
     private progressService: ProgressTrackerService
   ) {}
@@ -87,9 +75,9 @@ export class SecondaryContactComponent implements OnInit
       }
     });
   }
-
+isSubmitting = false;
   onSubmit() {
-  if (this.contactForm.invalid) return;
+  if (this.contactForm.invalid||this.isSubmitting) return;
 
   const data = {
     studentId: this.studentId,
@@ -98,7 +86,7 @@ export class SecondaryContactComponent implements OnInit
     phone: this.contactForm.value.phone,
     adress: this.contactForm.value.adress
   };
-
+  this.isSubmitting = true; // 🔒 lock submit
   this.profileService.addSecondaryContact(data).subscribe({
     next: (res) => {
       console.log('✅ Secondary contact added:', res);
@@ -110,7 +98,7 @@ export class SecondaryContactComponent implements OnInit
       //////////******* *//////
         this.progressService.setStep(2);
          //////////******* *//////
-      // ✅ Navigate to the next page (Qualification page)
+     
       this.router.navigate([`/home/studentProfile/qualification`, this.studentId]);
     },
     error: (err) => {
@@ -120,8 +108,13 @@ export class SecondaryContactComponent implements OnInit
         horizontalPosition: 'center',
         verticalPosition: 'top'
       });
+       this.isSubmitting = false; // 🔓 unlock on error
+
     }
+    
+    
   });
+  
 }
 
 

@@ -4,7 +4,7 @@ import { DashboardComponent } from '../Components/DashBoardView/dashboard.compon
 
 
 
-const routes: Routes = [
+  const routes: Routes = [
   { path: '', component: DashboardComponent }
 ];
 
@@ -13,3 +13,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class DashboardRoutingModule {}
+

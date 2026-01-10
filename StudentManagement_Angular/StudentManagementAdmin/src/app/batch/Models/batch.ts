@@ -3,4 +3,6 @@ export interface batch{
     batchName:string;
     batchTime:string;
     batchDescription:string;
+    branchId:string;
+    
 }

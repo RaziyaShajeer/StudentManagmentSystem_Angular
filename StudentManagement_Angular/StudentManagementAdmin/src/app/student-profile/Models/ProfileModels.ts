@@ -12,6 +12,13 @@ export interface studentProfile {
   email: string;
   phone: string;
   photoUrl?: string; 
+  branchId: string; 
+   currentstatus?: number | null;
+
+
+
+  companyNames?: string[];
+
 
 }
 
@@ -113,6 +120,19 @@ export enum PaymentMode {
     Card = 1,
     Online = 2
 }
+
+
+export enum Currentstatus {
+  Completed = 0,
+  Dropped = 1,
+  Break = 2,
+  WaitingforPlacemet = 3,
+  Placed = 4,
+  ProjectDoing = 5,
+  Doing = 6,                 // change this!
+  PlacementNotRequired = 7
+}
+
 
 //added
 export interface SecondaryContact {

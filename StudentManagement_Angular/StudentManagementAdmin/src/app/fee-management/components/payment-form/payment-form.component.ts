@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { StudentProfileService } from 'src/app/student-profile/Service/student-profile.service';
+import { ReportService } from 'src/app/student-profile/Service/student-profile.service';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { CourseService } from 'src/app/course/Services/course.service';
 import { Course } from 'src/app/course/Models/Course';
@@ -24,10 +24,11 @@ export class PaymentFormComponent implements OnInit {
   trialStudents: any[] = [];
   student!: any;
   courseList: any[] = [];
-  selectedCourseId!: string;
+  selectedCourse: Course | null = null;
+
   feeStructureId!: string;
   course!: Course;
-  selectedCourse!: Course;
+  // selectedCourse!: Course;
   successMessage: string = '';
   errorMessage: string = '';
 
@@ -47,7 +48,7 @@ export class PaymentFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private studentService: StudentProfileService,
+    private studentService: ReportService,
     private trialStudentService: TrialStudentService,
     private dialog: MatDialog,
     private courseService: CourseService,
@@ -184,11 +185,12 @@ export class PaymentFormComponent implements OnInit {
 
     this.selectedCourse = selected;
 
-    this.feePaymentForm.patchValue({
-      courseDetailId: selected.courseDetailId,
-      courseName: selected.courseId,
-      courseFee: selected.courseFee
-    });
+   this.feePaymentForm.patchValue({
+  courseDetailId: selected.courseDetailId,
+  courseName: selected.courseName || selected.course?.courseName || '',
+  courseFee: selected.courseFee
+});
+
 
     // fetch fees only for enrolled students (not trial)
     if (!this.isTrialStudent && this.student?.studentId) {

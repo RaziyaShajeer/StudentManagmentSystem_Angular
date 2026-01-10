@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomePageComponent } from './home-page/home-page.component';
 import { AuthGuard } from '../auth.guard';
+import { PlacementsComponent } from '../placements/placements.component';
 
 const routes: Routes = [
   {
@@ -20,6 +21,9 @@ const routes: Routes = [
       { path: 'mailDue', loadChildren: () => import('../mail-due/mail-due.module').then(m => m.MailDueModule) },
       { path: 'dashboard', loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule) },
       { path: 'feePayment', loadChildren: () => import('../fee-management/fee-management.module').then(m => m.FeeManagementModule) },
+      { path:'branch',loadChildren: () =>import('../branch/branch.module').then(m=>m.BranchModule)},
+      {path: 'placements',component: PlacementsComponent,canActivate: [AuthGuard]},
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }

@@ -14,7 +14,7 @@ import { fee } from '../Models/ProfileModels';
 @Injectable({
   providedIn: 'root'
 })
-export class StudentProfileService {
+export class ReportService {
   enrollmentType: string = '';
   private studentData = new BehaviorSubject<any>({});
   currentStudentData = this.studentData.asObservable();
@@ -69,6 +69,8 @@ updateSecondaryContact(data: SecondaryContact): Observable<any> {
   
 }
 
+
+
 ///
 
 
@@ -98,6 +100,12 @@ updateSecondaryContact(data: SecondaryContact): Observable<any> {
     return this.http.put(`${this.qualificationUrl}/${id}`, data);
 
   }
+
+
+
+  getTrialFee(trialStudentId: string) {
+  return this.http.get<any>(`${environment.baseurl}/TrialStudent/fee/${trialStudentId}`);
+}
 
   deleteQualification(id: any): Observable<any> {
     return this.http.delete(`${this.qualificationUrl}/${id}`);
@@ -170,7 +178,8 @@ updateSecondaryContact(data: SecondaryContact): Observable<any> {
     return this.http.get<feeStructure[]>(`${environment.baseurl}/byStudentId?studentId=${studentId}`);
   }
 
-  getFeesByStudentId(studentId: string): Observable<any[]> {
+  getFeesByStudentId(
+    studentId: string): Observable<any[]> {
   return this.http.get<any[]>(`${environment.baseurl}/GetFeesByStudentId/${studentId}`);
 }
 
@@ -244,6 +253,13 @@ updateSecondaryContact(data: SecondaryContact): Observable<any> {
 
 submitInstallments(feeStructureId: string, data: any[]) {
   return this.http.post(`/api/fees/submit/${feeStructureId}`, data);
+}
+getTrialStudents(name?: string) {
+  let params: any = {};
+
+  if (name) params.name = name;
+
+  return this.http.get(`${environment.baseurl}/trialStudent`, { params });
 }
 
 }

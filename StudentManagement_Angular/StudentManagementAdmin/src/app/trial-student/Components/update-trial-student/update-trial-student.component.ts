@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TrialStudentService } from '../../Services/trial-student.service';
 import { trialStudent } from '../../Models/trialStudent';
+import { BranchService } from 'src/app/branch/Services/branch.service';
 
 @Component({
   selector: 'app-update-trial-student',
@@ -13,12 +14,15 @@ export class UpdateTrialStudentComponent implements OnInit {
   studentForm!: FormGroup;
   studentId!: any;
     trialStudent!: trialStudent; 
+    branches: any[] = [];
+
 
   constructor(
     private fb: FormBuilder,
     private trialStudentService: TrialStudentService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private branchService:BranchService
   ) {}
 
  
@@ -30,20 +34,31 @@ ngOnInit(): void {
       lastName: ['', Validators.required],
       address: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required]
+      phone: ['', Validators.required],
+      branchId:['',Validators.required]
     });
+    this.loadBranches();
   this.loadStudentData();
 }
   
 
+loadBranches() {
+  this.branchService.getAllBranches().subscribe(res => {
+    this.branches = res;
+  });
+}
+
+
   loadStudentData(): void {
     this.trialStudentService.getTrialStudentById(this.studentId).subscribe(data => {
+       this.trialStudent = data;
           this.studentForm.patchValue({
             firstName: data.firstName,
            lastName: data.lastName,
            address:data.address,
            email:data.email,
-           phone:data.phone
+           phone:data.phone,
+          branchId: data.branchId 
             
           });
         });
@@ -63,7 +78,8 @@ ngOnInit(): void {
     address: formValue.address,
     email: formValue.email,
     phone: formValue.phone,
-    status: currentStatus
+    status: currentStatus,
+    branchId: formValue.branchId
   };
 
   this.trialStudentService.updateTrialStudent(this.studentId, updatedStudent).subscribe({

@@ -2,7 +2,7 @@
     <mat-card-title style="font-family: 'Times New Roman', Times, serif;font-size:320%;color: #0d17a1;padding: 1%;">
         Fee Report
     </mat-card-title><br><br>
-    <form [formGroup]="searchForm" (ngSubmit)="onSearch()" style="margin-left: 54px;">
+    <form [formGroup]="searchForm" (ngSubmit)="onSearchFeesNew()" style="margin-left: 54px;">
         <mat-form-field>
             <mat-label>From Date</mat-label>
             <input matInput [matDatepicker]="fromPicker" formControlName="fromDate">
@@ -27,10 +27,40 @@
             </mat-select>
         </mat-form-field>
 
+        <mat-form-field>
+  <mat-label>Branch</mat-label>
+
+  <mat-select formControlName="branchId">
+   <mat-option value="ALL">All</mat-option>
+
+    <mat-option *ngFor="let branch of branches"
+                [value]="branch.branchId">
+      {{ branch.branchName }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+   
+        
         <button mat-raised-button color="primary" type="submit"
             style="margin-left: 20px;margin-bottom: 20px;">Search</button>
+
+           
+    
+<button class="btn btn-success"
+        style="margin-left: 450px;margin-bottom: 20px;"
+        (click)="downloadExcel()">
+  Download Excel
+</button>
+
+            
     </form>
-    <div style="display: flex; gap: 12px; margin-top: 16px; justify-content: center;">
+ 
+
+
+    
+
+    <!-- <div style="display: flex; gap: 12px; margin-top: 16px; justify-content: center;">
         <mat-card style="max-width: 250px; padding: 12px; background-color: #e3f2fd; color: #0d47a1;">
             <mat-card-title style="font-size: 16px;">Today's Collection</mat-card-title>
             <mat-card-content style="font-size: 14px; line-height: 1.8; padding: 8px 16px;">
@@ -93,7 +123,7 @@
             </mat-card-content>
         </mat-card>
 
-    </div>
+    </div> -->
      
 <div class="report-card">
   <h3 class="report-title">Student Fee Report</h3>
@@ -113,7 +143,7 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let student of summarizedFees; let i = index">
+        <!-- <tr *ngFor="let student of summarizedFees; let i = index">
           <td class="id-cell" [title]="student.studentId">{{ student.studentId | slice:0:6 }}</td>
 
           <td class="student-name">{{ student.studentName }}</td>
@@ -126,7 +156,56 @@
           <td>
             <button class="btn-view" (click)="viewDetails(student)">View</button>
           </td>
-        </tr>
+        </tr> -->
+      <tr *ngFor="let student of summarizedFees">
+  <td>{{ student.studentReferenceId}}</td>
+  <td>{{ student.studentName }}</td>
+  <td>{{ student.totalPaidAmount }}</td>
+ <td>{{ student.balance }}</td>
+  <td>{{student.totalDueAmount}}</td>
+  <td>{{ student.totalAmount }}</td>
+  
+    <td>
+  <button class="btn btn-sm btn-outline-primary"
+          (click)="viewStudent(student)">
+     View
+  </button>
+</td>
+
+  
+</tr>
+
+
+            <!-- <tr class="total-row">
+    <td colspan="2"><strong>Grand Total</strong></td>
+
+    <td class="paid">
+        <strong>{{ getTotalPaid() | number:'1.0-0' }}</strong>
+    </td>
+    <td class="balance">
+        <strong>{{ getTotalBalance() | number:'1.0-0' }}</strong>
+    </td>
+    <td>
+        <strong>{{ getTotalOverdue() | number:'1.0-0' }}</strong>
+    </td>
+    <td>
+        <strong>{{ getGrandTotal() | number:'1.0-0' }}</strong>
+    </td>
+    <td></td>
+    </tr> -->
+<tr class="total-row">
+  <td colspan="2"><strong>Grand Total</strong></td>
+  <td><strong>{{ finalReport?.totalAmountPaid }}</strong></td>
+  <td><strong>{{ finalReport?.totalBalanceAmount }}</strong></td>
+<td><strong>{{ finalReport?.totalDueAmount }}</strong></td>
+  <td><strong>{{ finalReport?.totalFees }}</strong></td>
+  <td></td>
+</tr>
+
+
+
+
+
       </tbody>
     </table>
   </div>

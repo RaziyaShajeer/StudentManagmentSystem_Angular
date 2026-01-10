@@ -1,0 +1,29 @@
+<div class="update-wrapper">
+  <h2>Edit Branch</h2>
+
+  <form [formGroup]="branchForm" (ngSubmit)="onSubmit()">
+
+    <div class="form-group">
+      <label for="branchName">Branch Name</label>
+      <input id="branchName" type="text" formControlName="branchName" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="location">Location</label>
+      <input id="location" type="text" formControlName="location" class="form-control">
+    </div>
+
+    
+    <div class="form-group">
+      <label for="BranchCode">Branchcode</label>
+      <input id="BranchCode" type="text" formControlName="branchCode" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label for="pinCode">Pincode</label>
+      <input id="pinCode" type="text" formControlName="pinCode" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+</div>

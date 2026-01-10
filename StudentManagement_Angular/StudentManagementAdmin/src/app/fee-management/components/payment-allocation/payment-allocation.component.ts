@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
-import { StudentProfileService } from 'src/app/student-profile/Service/student-profile.service';
+import { ReportService } from 'src/app/student-profile/Service/student-profile.service';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
 import { InstallmentStatus } from 'src/app/student-profile/Models/ProfileModels';
@@ -26,7 +26,7 @@ export class PaymentAllocationComponent implements OnInit {
     .map(([label, value]) => ({ label, value }));
 
   constructor(
-    private studentService: StudentProfileService,
+    private studentService: ReportService,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private route: Router,
     private dialogRef: MatDialogRef<PaymentAllocationComponent>

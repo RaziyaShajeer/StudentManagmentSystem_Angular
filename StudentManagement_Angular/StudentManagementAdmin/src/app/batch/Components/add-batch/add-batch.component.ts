@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BatchService } from '../../Services/batch.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { BranchService } from 'src/app/branch/Services/branch.service';
 
 @Component({
   selector: 'app-add-batch',
@@ -12,10 +13,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class AddBatchComponent implements OnInit {
   batchForm!: FormGroup
   errorMessage!: string
+  branches: any[] = [];
+
   constructor(
     private formBuilder: FormBuilder,
     private batchService: BatchService,
-    private router: Router
+    private router: Router,
+    private branchService:BranchService
   ) { }
   ngOnInit(): void {
     this.batchForm = this.formBuilder.group({
@@ -25,7 +29,12 @@ export class AddBatchComponent implements OnInit {
       batchTimeTo: ['', Validators.required],
       batchTimeToPeriod: ['PM', Validators.required],
       batchDescription: ['', Validators.required],
+       branchId: ['', Validators.required],
     });
+    this.branchService.getAllBranches().subscribe({
+  next: (res) => this.branches = res
+});
+
 
   }
 
@@ -37,6 +46,7 @@ export class AddBatchComponent implements OnInit {
         batchName: formValue.batchName,
         batchTime: batchTime,
         batchDescription: formValue.batchDescription,
+        branchId: formValue.branchId 
       };
       this.batchService.addBatch(batchData).subscribe({
         next: (response) => {

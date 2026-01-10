@@ -6,7 +6,16 @@ import { ViewStudentReportComponent } from '../Components/view-student-report/vi
 const routes: Routes = [
   {path:'',component:ViewReportComponent},
   {path:'report',component:ViewReportComponent},
-  {path:'student-report/:studentId',component:ViewStudentReportComponent}  //CHANGED
+  {path:'student-report/:studentId',component:ViewStudentReportComponent}  ,
+  { path: '', component: ViewReportComponent },
+{
+  path: 'student-report/:studentId',
+  component: ViewStudentReportComponent
+}
+
+
+
+
 ];
 
 @NgModule({

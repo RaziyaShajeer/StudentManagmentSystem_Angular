@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { StudentProfileService } from 'src/app/student-profile/Service/student-profile.service';
+import { ReportService } from 'src/app/student-profile/Service/student-profile.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReturnMode } from '../../Models/feePayment';
 import { FeemanagementService } from '../../Services/feemanagement.service';
@@ -19,7 +19,7 @@ export class ReturnFormComponent implements OnInit{
   ];
   constructor(
     private fb:FormBuilder,
-    private studentService:StudentProfileService,
+    private studentService:ReportService,
     private feeService:FeemanagementService,
     private router:Router
   ){}
